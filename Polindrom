@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int main() {
+   int n;
+   cin >> n;
+   int k=n;
+   int l=0;
+   while (n > 0)
+   {
+       l=l*10;
+     l=l+(n%10);
+   n=n/10;
+}
+if (l==k) {
+       printf ("Polindrom");
+   }
+   else {
+       printf ("Ne polindrom");
+   }
+   return 0;
+}
