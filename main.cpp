@@ -147,8 +147,18 @@ public:
             i++;
         }
         unsigned int len = LengthElem - i - 1, pos = 0;
-        char *paste[len];
-        strcpy(paste, right.SubStr(pos,len));
+        char * paste = new char[len];
+        strcpy(paste,right.SubStr(pos,len));
+        Paste(LengthDL() - i + 1, paste);
+        delete[] paste;
+        paste = new char[LengthElem];
+        pos+=len;
+        while (pos + LengthElem < this->LengthDL() - 1) {
+            strcpy(paste, this->SubStr(pos, LengthElem));
+            Add(paste);
+            pos += LengthElem;
+        }
+
     }
 
     ~StringDL() {
