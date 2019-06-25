@@ -139,7 +139,7 @@ public:
         return *this;
     }
 
-    StringDL &operator+(StringDL &right) {
+    StringDL operator+(const StringDL &right) {
         StringDL str(*this);
         Element *temp = str.T;
         if (temp == nullptr) {
@@ -176,7 +176,7 @@ public:
         //delete[] temp;
     }
 
-    unsigned int LengthDL() {
+    unsigned int LengthDL() const {
         unsigned int length = 0;
         if (H == nullptr) {
             return length;
@@ -196,7 +196,7 @@ public:
         return length;
     }
 
-    int PosSub(StringDL &sub) {
+    int PosSub(const StringDL &sub) {
         Element *temp = H;
         Element *temp1 = sub.H;
         int count = 0, j = 0, countOfEq = 0;
@@ -228,8 +228,8 @@ public:
     }
 
     StringDL SubStr(unsigned int k, unsigned int n) {
-        if (k + n > this->LengthDL()) {
-            char *res = "";
+        if (k + n > this->LengthDL() || k == n) {
+            StringDL res("");
             return res;
         }
         char *res = new char[n + 1];
@@ -258,7 +258,7 @@ public:
         return str;
     }
 
-    int DelSub(StringDL &sub) {
+    int DelSub(const StringDL &sub) {
         int pos = this->PosSub(sub);
         if (pos == -1) {
             return -1;
@@ -288,7 +288,7 @@ public:
         return 0;
     }
 
-    void Paste(unsigned int pos, StringDL &paste) {
+    void Paste(unsigned int pos, StringDL const &paste) {
         Element *temp = H;
         Element *temp1 = paste.H;
         int num = pos / LengthElem;
@@ -327,7 +327,7 @@ public:
     }
 };
 
-void Replace(StringDL &str, StringDL &sub, StringDL &paste) {
+void Replace(StringDL &str, StringDL &sub, StringDL const &paste) {
     if (str.PosSub(sub) != -1) {
         int pos = str.PosSub(sub);
         StringDL temp;
