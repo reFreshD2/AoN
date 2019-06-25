@@ -27,7 +27,7 @@ class StringDL {
         }
     }
 
-    void Paste(unsigned int pos, const char *paste) {
+    void ToNull(unsigned int pos, unsigned int n) {
         Element *temp = H;
         int num = pos / LengthElem;
         while (num != 0) {
@@ -35,18 +35,17 @@ class StringDL {
             num--;
             pos -= LengthElem;
         }
-        int i = pos, j = 0, len = strlen(paste);
-        while (len != 0) {
+        int i = pos;
+        while (n != 0) {
             if (i < LengthElem) {
-                temp->str[i] = paste[j];
+                temp->str[i] = '*';
             } else {
                 temp = temp->Next;
                 i = 0;
-                temp->str[i] = paste[j];
+                temp->str[i] = '*';
             }
-            j++;
             i++;
-            len--;
+            n--;
         }
     }
 
@@ -141,24 +140,18 @@ public:
     }
 
     StringDL &operator+(StringDL &right) {
-        Element *temp = T;
-        unsigned int i = 0;
-        while (temp->str[i] != '*') {
-            i++;
+        StringDL str(*this);
+        Element *temp = str.T;
+        if (temp == nullptr) {
+            return right;
         }
-        unsigned int len = LengthElem - i - 1, pos = 0;
-        char * paste = new char[len];
-        strcpy(paste,right.SubStr(pos,len));
-        Paste(LengthDL() - i + 1, paste);
-        delete[] paste;
-        paste = new char[LengthElem];
-        pos+=len;
-        while (pos + LengthElem < this->LengthDL() - 1) {
-            strcpy(paste, this->SubStr(pos, LengthElem));
-            Add(paste);
-            pos += LengthElem;
+        int len = LengthDL();
+        str.Paste(len, right);
+        while (temp->str[0] == '*') {
+            temp = temp->Prev;
+            temp->Next = nullptr;
         }
-
+        return str;
     }
 
     ~StringDL() {
@@ -176,16 +169,18 @@ public:
             temp = temp->Next;
         }
         unsigned int i = 0;
-        while (temp->str[i] != '*') {
+        while (temp->str[i] != '*' && i < LengthElem) {
             cout << temp->str[i];
             i++;
         }
-        cout << endl;
         //delete[] temp;
     }
 
-    int LengthDL() {
+    unsigned int LengthDL() {
         unsigned int length = 0;
+        if (H == nullptr) {
+            return length;
+        }
         Element *temp = H;
         while (temp->Next != nullptr) {
             length++;
@@ -193,7 +188,7 @@ public:
         }
         length = length * LengthElem;
         unsigned int i = 0;
-        while (temp->str[i] != '*') {
+        while (temp->str[i] != '*' && i < LengthElem) {
             length++;
             i++;
         }
@@ -201,42 +196,38 @@ public:
         return length;
     }
 
-    int PosSub(const char *sub) {
+    int PosSub(StringDL &sub) {
         Element *temp = H;
-        int count = 0, j = 0;
+        Element *temp1 = sub.H;
+        int count = 0, j = 0, countOfEq = 0;
         int pos;
-        while (temp->Next != nullptr) {
+        while (temp != nullptr) {
             int i = 0;
             for (i; i < LengthElem; i++) {
-                if (temp->str[i] == sub[j]) {
+                if (temp->str[i] == temp1->str[j]) {
+                    countOfEq++;
                     pos = i;
                     j++;
-                    if (j == strlen(sub)) {
-                        return (count * LengthElem) + pos - strlen(sub) + 1;
+                    if (countOfEq == sub.LengthDL()) {
+                        return (count * LengthElem) + pos - sub.LengthDL() + 1;
+                    }
+                    if (j == sub.LengthElem) {
+                        temp1 = temp1->Next;
+                        j = 0;
                     }
                 } else {
+                    temp1 = sub.H;
                     j = 0;
+                    countOfEq = 0;
                 }
             }
             temp = temp->Next;
             count++;
         }
-        int i = 0;
-        for (i; i < LengthElem; i++) {
-            if (temp->str[i] == sub[j]) {
-                pos = i;
-                j++;
-                if (j == strlen(sub)) {
-                    return (count * LengthElem) + pos - strlen(sub) + 1;
-                }
-            } else {
-                j = 0;
-            }
-        }
         return -1;
     }
 
-    char *SubStr(unsigned int k, unsigned int n) {
+    StringDL SubStr(unsigned int k, unsigned int n) {
         if (k + n > this->LengthDL()) {
             char *res = "";
             return res;
@@ -263,67 +254,146 @@ public:
             n--;
         }
         res[j] = '\0';
-        return res;
+        StringDL str(res);
+        return str;
     }
 
-    int DelSub(const char *sub) {
+    int DelSub(StringDL &sub) {
         int pos = this->PosSub(sub);
         if (pos == -1) {
             return -1;
         }
-        int len = strlen(sub);
-        char *paste = new char[len];
-        while (pos + len < this->LengthDL() - 1) {
-            strcpy(paste, this->SubStr(pos + len, len));
-            Paste(pos, paste);
-            pos += len;
-        }
-        if (this->LengthDL() - (pos + len) != 0) {
-            strcpy(paste, this->SubStr(pos + len, LengthDL() - (pos + len)));
-            for (int i = LengthDL() - (pos + len); i < len; i++) {
-                paste[i] = '*';
-            }
-        } else {
-            for (int i = 0; i < len; i++) {
-                paste[i] = '*';
-            }
-        }
+        int len = sub.LengthDL(), len1 = LengthDL();
+        StringDL paste;
+        paste = this->SubStr(pos + len, LengthDL() - (pos + len));
         Paste(pos, paste);
+        ToNull(len1 - len, len);
         Element *temp = H;
-        while (temp->Next != nullptr) {
+        if (temp->str[0] == '*') {
             temp = temp->Next;
-        }
-        while (temp->str[0] == '*') {
-            temp = temp->Prev;
+            while (temp != nullptr) {
+                T = temp->Next;
+                delete temp;
+                temp = T;
+            }
+            temp = H;
             temp->Next = nullptr;
+        } else {
+            temp = T;
+            while (temp->str[0] == '*' && temp->Prev != nullptr) {
+                temp = temp->Prev;
+                temp->Next = nullptr;
+            }
         }
         return 0;
     }
+
+    void Paste(unsigned int pos, StringDL &paste) {
+        Element *temp = H;
+        Element *temp1 = paste.H;
+        int num = pos / LengthElem;
+        while (num != 0) {
+            temp = temp->Next;
+            num--;
+            pos -= LengthElem;
+        }
+        int i = pos, j = 0, len = paste.LengthDL();
+        while (len != 0) {
+            if (i < LengthElem) {
+                temp->str[i] = temp1->str[j];
+            } else {
+                if (temp->Next != nullptr) {
+                    temp = temp->Next;
+                } else {
+                    char *str = new char[LengthElem];
+                    for (int k = 0; k < LengthElem; k++) {
+                        str[k] = '*';
+                    }
+                    str[LengthElem] = '\0';
+                    Add(str);
+                    temp = temp->Next;
+                }
+                i = 0;
+                temp->str[i] = temp1->str[j];
+            }
+            j++;
+            if (j == paste.LengthElem) {
+                temp1 = temp1->Next;
+                j = 0;
+            }
+            i++;
+            len--;
+        }
+    }
 };
+
+void Replace(StringDL &str, StringDL &sub, StringDL &paste) {
+    if (str.PosSub(sub) != -1) {
+        int pos = str.PosSub(sub);
+        StringDL temp;
+        temp = str.SubStr(pos, str.LengthDL() - pos);
+        str.DelSub(temp);
+        str = str + paste;
+        temp.DelSub(sub);
+        while (temp.PosSub(sub) != -1) {
+            pos = temp.PosSub(sub);
+            StringDL str1;
+            str1 = temp.SubStr(0, pos);
+            temp.DelSub(str1);
+            temp.DelSub(sub);
+            str = str + str1 + paste;
+        }
+    }
+}
 
 int main() {
     setlocale(LC_ALL, "Russian");
     StringDL str1("The Forest Raised a Christmas Tree.", 10);
-    cout << "String 1: ";
+    StringDL str2("The Forest Raised a Christmas Tree.", 3);
+    Replace(str1, str2, str1 + str2);
+    cout << "String 1 after replacing: ";
     str1.Print();
+    cout << endl;
+    /*cout << "String 1: ";
+    str1.Print();
+    cout << endl;
     cout << "Dlina stroki: " << str1.LengthDL() << endl;
-    char *sub = "ee";
+    StringDL sub("Tree", 3);
     if (str1.PosSub(sub) != -1) {
-        cout << "Poziciya podstroki \'" << sub << "\' " << str1.PosSub(sub) << endl;
+        cout << "Poziciya podstroki \'";
+        sub.Print();
+        cout << "\' " << str1.PosSub(sub) << endl;
     } else {
-        cout << "Stroka - " << sub << " ne naydena" << endl;
+        cout << "Stroka - ";
+        sub.Print();
+        cout << " ne naydena" << endl;
     }
     sub = str1.SubStr(4, 6);
-    cout << "Videlena podstroka: " << sub << endl;
+    cout << "Videlena podstroka: ";
+    sub.Print();
+    cout << endl;
     StringDL str2(str1);
     str1.DelSub(sub);
     cout << "String 1: ";
     str1.Print();
+    cout << endl;
     cout << "String 2: ";
     str2.Print();
+    cout << endl;
     str1 = str2;
     cout << "str1 = str2: ";
     str1.Print();
+    cout << endl;
+    StringDL str3(" End.");
+    str1 + str3;
+    cout << "str1 + str3: ";
+    str1.Print();
+    cout << endl;
+    StringDL s1("."), s2("...");
+    Replace(str1, s1, s2);
+    cout << "String 1 after replacing: ";
+    str1.Print();
+    cout << endl;*/
     int z;
     cin >> z;
     return 0;
