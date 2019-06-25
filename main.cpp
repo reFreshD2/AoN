@@ -53,7 +53,7 @@ public:
     StringDL(const char *str = "", unsigned int length = 5) {
         LengthElem = length;
         H = T = nullptr;
-        char *temp = new char[LengthElem];
+        char *temp = new char[LengthElem + 1];
         unsigned int i = 0;
         if ((strlen(str) % LengthElem) == 0) {
             while (i <= strlen(str)) {
@@ -96,7 +96,7 @@ public:
         while (copyDL != nullptr) {
             Element *temp = new Element;
             temp->Next = nullptr;
-            temp->str = new char[LengthElem];
+            temp->str = new char[LengthElem + 1];
             strcpy(temp->str, copyDL->str);
             if (H != nullptr) {
                 temp->Prev = T;
@@ -124,7 +124,7 @@ public:
         while (rightDL != nullptr) {
             Element *temp = new Element;
             temp->Next = nullptr;
-            temp->str = new char[LengthElem];
+            temp->str = new char[LengthElem + 1];
             strcpy(temp->str, rightDL->str);
             if (H != nullptr) {
                 temp->Prev = T;
@@ -305,7 +305,7 @@ public:
                 if (temp->Next != nullptr) {
                     temp = temp->Next;
                 } else {
-                    char *str = new char[LengthElem];
+                    char *str = new char[LengthElem + 1];
                     for (int k = 0; k < LengthElem; k++) {
                         str[k] = '*';
                     }
