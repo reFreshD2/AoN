@@ -164,14 +164,18 @@ public:
 
     void Print() {
         Element *temp = H;
-        while (temp->Next != nullptr) {
-            cout << temp->str;
-            temp = temp->Next;
+        if (T == nullptr){
         }
-        unsigned int i = 0;
-        while (temp->str[i] != '*' && i < LengthElem) {
-            cout << temp->str[i];
-            i++;
+        else {
+            while (temp->Next != nullptr) {
+                cout << temp->str;
+                temp = temp->Next;
+            }
+            unsigned int i = 0;
+            while (temp->str[i] != '*' && i < LengthElem) {
+                cout << temp->str[i];
+                i++;
+            }
         }
         //delete[] temp;
     }
@@ -333,7 +337,7 @@ void Replace(StringDL &str, StringDL &sub, StringDL const &paste) {
         StringDL buf(str);
         int p = buf.PosSub(sub);
         while (p != -1) {
-            res = res + buf.SubStr(0, p - 1) + paste;
+            res = res + buf.SubStr(0, p ) + paste;
             buf = buf.SubStr(p + sub.LengthDL(), str.LengthDL() - sub.LengthDL());
             p = buf.PosSub(sub);
         }
@@ -357,10 +361,14 @@ void Replace(StringDL &str, StringDL &sub, StringDL const &paste) {
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    StringDL str1("The Forest Raised a Christmas Tree.", 10);
-    StringDL str2("The Forest Raised a Christmas Tree.", 3);
+    StringDL str1(" ", 10);
+    StringDL str2("The ", 1);
     StringDL s = str1 + str2;
-    Replace(s, str2, str1 + str2);
+    s.Print();
+    cout << endl;
+    str2.Print();
+    cout << endl;
+    Replace(s, str1, str2);
     cout << "String 1 after replacing: ";
     s.Print();
     cout << endl;
