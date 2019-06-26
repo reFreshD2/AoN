@@ -228,7 +228,7 @@ public:
     }
 
     StringDL SubStr(unsigned int k, unsigned int n) {
-        if (k + n > this->LengthDL() || k == n) {
+        if (k + n > this->LengthDL() || n == 0) {
             StringDL res("");
             return res;
         }
@@ -292,7 +292,7 @@ public:
         Element *temp = H;
         Element *temp1 = paste.H;
         int num = pos / LengthElem;
-        while (num != 0) {
+        while (num != 0 && temp->Next != nullptr) {
             temp = temp->Next;
             num--;
             pos -= LengthElem;
@@ -329,20 +329,29 @@ public:
 
 void Replace(StringDL &str, StringDL &sub, StringDL const &paste) {
     if (str.PosSub(sub) != -1) {
-        int pos = str.PosSub(sub);
-        StringDL temp;
-        temp = str.SubStr(pos, str.LengthDL() - pos);
-        str.DelSub(temp);
-        str = str + paste;
-        temp.DelSub(sub);
-        while (temp.PosSub(sub) != -1) {
-            pos = temp.PosSub(sub);
-            StringDL str1;
-            str1 = temp.SubStr(0, pos);
-            temp.DelSub(str1);
-            temp.DelSub(sub);
-            str = str + str1 + paste;
+        StringDL res;
+        StringDL buf(str);
+        int p = buf.PosSub(sub);
+        while (p != -1) {
+            res = res + buf.SubStr(0, p - 1) + paste;
+            buf = buf.SubStr(p + sub.LengthDL(), str.LengthDL() - sub.LengthDL());
+            p = buf.PosSub(sub);
         }
+        str = res + buf;
+        /*   int pos = str.PosSub(sub);
+           StringDL temp;
+           temp = str.SubStr(pos, str.LengthDL() - sub.LengthDL());
+           str.DelSub(temp);
+           str = str + paste;
+           temp.DelSub(sub);
+           while (temp.PosSub(sub) != -1) {
+               pos = temp.PosSub(sub);
+               StringDL str1;
+               str1 = temp.SubStr(0, temp.LengthDL() - pos);
+               temp.DelSub(str1);
+               temp.DelSub(sub);
+               str = str + str1 + paste;
+           }*/
     }
 }
 
@@ -350,9 +359,10 @@ int main() {
     setlocale(LC_ALL, "Russian");
     StringDL str1("The Forest Raised a Christmas Tree.", 10);
     StringDL str2("The Forest Raised a Christmas Tree.", 3);
-    Replace(str1, str2, str1 + str2);
+    StringDL s = str1 + str2;
+    Replace(s, str2, str1 + str2);
     cout << "String 1 after replacing: ";
-    str1.Print();
+    s.Print();
     cout << endl;
     /*cout << "String 1: ";
     str1.Print();
@@ -394,7 +404,5 @@ int main() {
     cout << "String 1 after replacing: ";
     str1.Print();
     cout << endl;*/
-    int z;
-    cin >> z;
     return 0;
 }
